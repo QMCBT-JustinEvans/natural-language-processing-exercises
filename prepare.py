@@ -153,3 +153,50 @@ def prep_article_data(df, column_name, extra_words=[], exclude_words=[]):
     
     return df[['title', 'original', 'clean', 'stemmed', 'lemmatized']]
 
+def clean(text, stem_or_lem=None, add_stopwords=[]):
+    """
+    Description:
+    Simplified text cleaning function
+    
+    Required Imports:
+    import re
+    import nltk
+    import unicodedata
+    import pandas as pd
+    from nltk.corpus import stopwords
+
+    Arguments:
+             text = The text you want to clean
+      stem_or_lem = Default is None; stem will perform stemming on your text; lem will lemmatize it.
+    add_stopwords = [] This is an empty list by default; just add words that you want to include as stopwords.
+    
+    Returns:
+    returns list of cleaned words.
+    """
+    # 1. lowercase everything
+    text = text.lower()
+    # 2. Remove accented and ASCII characters
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')
+    # 3. Remove special characters
+    words = re.sub(r"[^a-z0-9\s]", '', text).split()
+    # 4. Tokenize
+    tokenize = nltk.tokenize.ToktokTokenizer()
+    tokenize.tokenize(text, return_str=False)
+    # 5. Stemming or Lemmatizing
+    if stem_or_lem == "stem":
+        ps = nltk.porter.PorterStemmer()
+        text = [ps.stem(word) for word in text.split()]
+        ' '.join(text)
+        print('Stemming Performed')
+    elif stem_or_lem == "lem":
+        wnl = nltk.stem.WordNetLemmatizer()
+        text = [wnl.lemmatize(word) for word in text.split()]
+        ' '.join(text)
+        print('Lemmatizing Performed')
+    else:
+        print('No Stemming or Lemmatizing Performed')
+    # 6. Remove StopWords
+    stopwords = nltk.corpus.stopwords.words('english') + add_stopwords
+    
+    return [word for word in words if word not in stopwords]
+
